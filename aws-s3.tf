@@ -19,6 +19,18 @@ provider "aws" {
 
 
 
+#Bucket Create if exist
+resource "aws_s3_bucket" "OPS_MANAGER_S3_BUCKET" {
+    bucket = "OPS_MANAGER_S3_BUCKET"
+    acl = "private"
+}
+
+
+resource "aws_s3_bucket" "ELASTIC_RUNTIME_S3_BUCKET" {
+    bucket = "ELASTIC_RUNTIME_S3_BUCKET"
+    acl = "private"
+}
+
 #Create VPC
 
 resource "aws_vpc" "pcf-vpc" {
@@ -86,7 +98,7 @@ resource "aws_db_subnet_group" "PCF_RDSGroup" {
 
 resource "aws_security_group" "MySQL" {
 	name = "MySQL"
-	description = "MySQL security group"
+	description = "MySQL"
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 
 	ingress {
@@ -131,7 +143,7 @@ resource "aws_db_instance" "pcf-bosh" {
 
 resource "aws_security_group" "OpsManager" {
 	name = "OpsManager"
-	description = "OpsManager Security groups"
+	description = "OpsManager"
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 
 	ingress {
@@ -165,7 +177,7 @@ resource "aws_security_group" "OpsManager" {
 
 resource "aws_security_group" "pcfVMs" {
 	name = "pcfVMs"
-	description = "pcfVMs Security groups"
+	description = "pcfVMs"
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 
 
@@ -186,7 +198,7 @@ resource "aws_security_group" "pcfVMs" {
 
 resource "aws_security_group" "PCF_ELB_SecurityGroup" {
 	name = "PCF_ELB_SecurityGroup"
-	description = "PCF Elastic Load balancer security group"
+	description = "PCF_ELB_SecurityGroup"
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 
 	ingress {
@@ -222,8 +234,8 @@ resource "aws_security_group" "PCF_ELB_SecurityGroup" {
 
 
 resource "aws_security_group" "OutboundNAT" {
-	name = "Outbound NAT"
-	description = "Outbound NAT security groups"
+	name = "OutboundNAT"
+	description = "OutboundNAT"
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 
 	ingress {
@@ -369,5 +381,45 @@ resource "aws_route_table_association" "private-az1-rt-assoc" {
 	route_table_id = "${aws_route_table.private-az1-rt.id}"
 }
 
+
+############
+# Outputs
+############
+
+
+
+output "OpsManager_Bucket" {
+    value = "${aws_s3_bucket.OPS_MANAGER_S3_BUCKET.id}"
+}
+
+
+output "Elasticruntime_Bucket" {
+    value = "${aws_s3_bucket.ELASTIC_RUNTIME_S3_BUCKET.id}"
+}
+
+output "Private_Avaibility_zone" {
+    value = "${aws_subnet.private-az1.availability_zone}"
+}
+
+output "PCF_VPC_id" {
+    value = "${aws_vpc.pcf-vpc.id}"
+}
+
+output "MySQL_Username" {
+    value = "${aws_db_instance.pcf-bosh.username}"
+}
+
+output "MySQL_Database_Name" {
+    value = "${aws_db_instance.pcf-bosh.name}"
+}
+
+output "MySQL_Host" {
+    value = "${aws_db_instance.pcf-bosh.address}"
+}
+
+
+output "OpsManager-DNS" {
+    value = "${aws_instance.OpsManager.public_dns}"
+}
 
 

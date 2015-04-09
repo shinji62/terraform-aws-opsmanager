@@ -32,5 +32,11 @@ make apply
 ```
 
 
+#TODO
 
+* A lot of Todo
+
+    * Clean the code / use module instead of one file 
+    * More flexible / reusable code
+    *   
 
