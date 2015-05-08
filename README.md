@@ -4,11 +4,11 @@ This terraform script just automize most of described task on [Pcf on AWS docume
 
 #Prerequies
 
-* You **must** being using at least terraform version 0.4.0. [terraform](https://terraform.io)
+* You **must** being using at least terraform version >= 0.4.1 [terraform](https://terraform.io)
 
 ```
 $ terraform -v
-Terraform v0.4.0
+Terraform v0.4.1
 ```
 
 * You need an AWS account, admin account is good enough.
@@ -38,5 +38,5 @@ make apply
 
     * Clean the code / use module instead of one file 
     * More flexible / reusable code
-    *   
+  
 
