@@ -45,7 +45,7 @@ resource "aws_vpc" "pcf-vpc" {
 resource "aws_subnet" "public-az1" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.0.0/24"
-	availability_zone = "us-east-1a"
+	availability_zone = "${var.aws_region}a"
 	tags {
 		Name = "public-az1"
 	}
@@ -55,7 +55,7 @@ resource "aws_subnet" "public-az1" {
 resource "aws_subnet" "private-az1" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.16.0/20"
-	availability_zone = "us-east-1a"
+	availability_zone = "${var.aws_region}a"
 	tags {
 		Name = "private-az1"
 	}
@@ -64,15 +64,15 @@ resource "aws_subnet" "private-az1" {
 
 
 /* **********************************
-* 
+*
 * RDS MYSQL
-**************************************/ 
+**************************************/
 
 
 resource "aws_subnet" "rds-1" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.2.0/24"
-	availability_zone = "us-east-1a"
+	availability_zone = "${var.aws_region}a"
 	tags {
 		Name = "rds-1"
 	}
@@ -83,7 +83,7 @@ resource "aws_subnet" "rds-1" {
 resource "aws_subnet" "rds-2" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.3.0/24"
-	availability_zone = "us-east-1c"
+	availability_zone = "${var.aws_region}c"
 	tags {
 		Name = "rds-2"
 	}
@@ -137,9 +137,9 @@ resource "aws_db_instance" "pcf-bosh" {
 
 
 /* **********************************
-* Security GRoups  
-* 
-**************************************/ 
+* Security GRoups
+*
+**************************************/
 
 resource "aws_security_group" "OpsManager" {
 	name = "OpsManager"
@@ -270,10 +270,10 @@ resource "aws_security_group" "OutboundNAT" {
 
 
 /* **********************************
-* Instances 
-* 
-**************************************/ 
- 
+* Instances
+*
+**************************************/
+
 
 resource "aws_instance" "OpsManager" {
 	ami = "${var.aws_opsmanager_ami}"
@@ -299,9 +299,9 @@ resource "aws_instance" "OpsManager" {
 
 
 /* **********************************
-* Load Balancer  
-* 
-**************************************/ 
+* Load Balancer
+*
+**************************************/
 
 resource "aws_elb" "pcf-aws-lb" {
 	name = "pcf-aws-lb"
@@ -421,5 +421,3 @@ output "MySQL_Host" {
 output "OpsManager-DNS" {
     value = "${aws_instance.OpsManager.public_dns}"
 }
-
-
