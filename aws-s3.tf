@@ -9,7 +9,18 @@ variable "mysql_username" {}
 variable "mysql_password" {}
 
 
-
+variable "aws_nat_ami" {
+  default = {
+    us-east-1 = "ami-4c9e4b24"
+    us-west-1 = "ami-1d2b2958"
+    us-west-2 = "ami-8b6912bb"
+    ap-northeast-1 = "ami-49c29e48"
+    ap-southeast-1 = "ami-d482da86"
+    ap-southeast-2 = "ami-a164029b"
+    eu-west-1 = "ami-5b60b02c"
+    sa-east-1 = "ami-8b72db96"
+  }
+}
 
 provider "aws" {
     access_key = "${var.aws_access_key}"
@@ -183,7 +194,7 @@ resource "aws_security_group" "pcfVMs" {
 
 	ingress {
 		from_port = 0
-		to_port = 0
+		to_port = 65535
 		protocol = "-1"
 		cidr_blocks = ["${aws_vpc.pcf-vpc.cidr_block}"]
 	}
@@ -339,7 +350,7 @@ resource "aws_internet_gateway" "pcf-vpc-gw" {
 *
 */
 resource "aws_instance" "nat" {
-	ami = "ami-4c9e4b24"
+  ami = "${lookup(var.aws_nat_ami, var.aws_region)}"
 	instance_type = "t2.small"
 	key_name = "${var.aws_key_name_ops}"
 	security_groups = ["${aws_security_group.OutboundNAT.id}"]
