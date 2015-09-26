@@ -6,6 +6,7 @@ variable "vpc_name" {}
 variable "aws_region" {}
 variable "mysql_username" {}
 variable "mysql_password" {}
+variable "bucket_prefix" {}
 
 variable "aws_nat_ami" {
   default = {
@@ -30,13 +31,13 @@ provider "aws" {
 
 #Bucket Create if exist
 resource "aws_s3_bucket" "OPS_MANAGER_S3_BUCKET" {
-    bucket = "OPS_MANAGER_S3_BUCKET"
+  bucket = "${var.bucket_prefix}-pcf-opsmgr"
     acl = "private"
 }
 
 
 resource "aws_s3_bucket" "ELASTIC_RUNTIME_S3_BUCKET" {
-    bucket = "ELASTIC_RUNTIME_S3_BUCKET"
+    bucket = "${var.bucket_prefix}-pcf-elastic-runtime"
     acl = "private"
 }
 
