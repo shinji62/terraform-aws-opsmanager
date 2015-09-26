@@ -3,11 +3,9 @@ variable "aws_secret_key" {}
 variable "aws_key_name_pcf" {}
 variable "aws_key_name_ops" {}
 variable "vpc_name" {}
-variable "aws_opsmanager_ami" {}
 variable "aws_region" {}
 variable "mysql_username" {}
 variable "mysql_password" {}
-
 
 variable "aws_nat_ami" {
   default = {
@@ -287,7 +285,7 @@ resource "aws_security_group" "OutboundNAT" {
 
 
 resource "aws_instance" "OpsManager" {
-	ami = "${var.aws_opsmanager_ami}"
+	ami = "${lookup(var.aws_pcf_opsmgr_ami, var.aws_region)}"
 	instance_type = "m3.large"
 	key_name = "${var.aws_key_name_ops}"
 	subnet_id = "${aws_subnet.public-az1.id}"
