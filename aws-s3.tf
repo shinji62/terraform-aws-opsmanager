@@ -73,8 +73,7 @@ resource "aws_subnet" "private-az1" {
 
 
 
-/* **********************************
-*
+/*************************************
 * RDS MYSQL
 **************************************/
 
@@ -88,8 +87,6 @@ resource "aws_subnet" "rds-1" {
 	}
 }
 
-
-
 resource "aws_subnet" "rds-2" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.3.0/24"
@@ -98,7 +95,6 @@ resource "aws_subnet" "rds-2" {
 		Name = "rds-2"
 	}
 }
-
 
 resource "aws_db_subnet_group" "PCF_RDSGroup" {
     name = "PCF_RDSGroup"
@@ -147,7 +143,7 @@ resource "aws_db_instance" "pcf-bosh" {
 
 
 /* **********************************
-* Security GRoups
+* Security Groups
 *
 **************************************/
 

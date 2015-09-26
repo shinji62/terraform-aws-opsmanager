@@ -1,4 +1,4 @@
-# Aug 31 2015
+# v1.5.5.0 Aug 31 2015
 variable "aws_pcf_opsmgr_ami" {
   default = {
     us-east-1 = "ami-d9912bb2"
