@@ -3,13 +3,23 @@ variable "aws_secret_key" {}
 variable "aws_key_name_pcf" {}
 variable "aws_key_name_ops" {}
 variable "vpc_name" {}
-variable "aws_opsmanager_ami" {}
 variable "aws_region" {}
 variable "mysql_username" {}
 variable "mysql_password" {}
+variable "bucket_prefix" {}
 
-
-
+variable "aws_nat_ami" {
+  default = {
+    us-east-1 = "ami-4c9e4b24"
+    us-west-1 = "ami-1d2b2958"
+    us-west-2 = "ami-8b6912bb"
+    ap-northeast-1 = "ami-49c29e48"
+    ap-southeast-1 = "ami-d482da86"
+    ap-southeast-2 = "ami-a164029b"
+    eu-west-1 = "ami-5b60b02c"
+    sa-east-1 = "ami-8b72db96"
+  }
+}
 
 provider "aws" {
     access_key = "${var.aws_access_key}"
@@ -21,13 +31,13 @@ provider "aws" {
 
 #Bucket Create if exist
 resource "aws_s3_bucket" "OPS_MANAGER_S3_BUCKET" {
-    bucket = "OPS_MANAGER_S3_BUCKET"
+  bucket = "${var.bucket_prefix}-pcf-opsmgr"
     acl = "private"
 }
 
 
 resource "aws_s3_bucket" "ELASTIC_RUNTIME_S3_BUCKET" {
-    bucket = "ELASTIC_RUNTIME_S3_BUCKET"
+    bucket = "${var.bucket_prefix}-pcf-elastic-runtime"
     acl = "private"
 }
 
@@ -45,7 +55,7 @@ resource "aws_vpc" "pcf-vpc" {
 resource "aws_subnet" "public-az1" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.0.0/24"
-	availability_zone = "us-east-1a"
+	availability_zone = "${var.aws_region}a"
 	tags {
 		Name = "public-az1"
 	}
@@ -55,7 +65,7 @@ resource "aws_subnet" "public-az1" {
 resource "aws_subnet" "private-az1" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.16.0/20"
-	availability_zone = "us-east-1a"
+	availability_zone = "${var.aws_region}a"
 	tags {
 		Name = "private-az1"
 	}
@@ -63,32 +73,28 @@ resource "aws_subnet" "private-az1" {
 
 
 
-/* **********************************
-* 
+/*************************************
 * RDS MYSQL
-**************************************/ 
+**************************************/
 
 
 resource "aws_subnet" "rds-1" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.2.0/24"
-	availability_zone = "us-east-1a"
+	availability_zone = "${var.aws_region}a"
 	tags {
 		Name = "rds-1"
 	}
 }
 
-
-
 resource "aws_subnet" "rds-2" {
 	vpc_id = "${aws_vpc.pcf-vpc.id}"
 	cidr_block = "10.0.3.0/24"
-	availability_zone = "us-east-1c"
+	availability_zone = "${var.aws_region}c"
 	tags {
 		Name = "rds-2"
 	}
 }
-
 
 resource "aws_db_subnet_group" "PCF_RDSGroup" {
     name = "PCF_RDSGroup"
@@ -137,9 +143,9 @@ resource "aws_db_instance" "pcf-bosh" {
 
 
 /* **********************************
-* Security GRoups  
-* 
-**************************************/ 
+* Security Groups
+*
+**************************************/
 
 resource "aws_security_group" "OpsManager" {
 	name = "OpsManager"
@@ -183,7 +189,7 @@ resource "aws_security_group" "pcfVMs" {
 
 	ingress {
 		from_port = 0
-		to_port = 65535
+		to_port = 0
 		protocol = "-1"
 		cidr_blocks = ["${aws_vpc.pcf-vpc.cidr_block}"]
 	}
@@ -270,13 +276,13 @@ resource "aws_security_group" "OutboundNAT" {
 
 
 /* **********************************
-* Instances 
-* 
-**************************************/ 
- 
+* Instances
+*
+**************************************/
+
 
 resource "aws_instance" "OpsManager" {
-	ami = "${var.aws_opsmanager_ami}"
+	ami = "${lookup(var.aws_pcf_opsmgr_ami, var.aws_region)}"
 	instance_type = "m3.large"
 	key_name = "${var.aws_key_name_ops}"
 	subnet_id = "${aws_subnet.public-az1.id}"
@@ -299,9 +305,9 @@ resource "aws_instance" "OpsManager" {
 
 
 /* **********************************
-* Load Balancer  
-* 
-**************************************/ 
+* Load Balancer
+*
+**************************************/
 
 resource "aws_elb" "pcf-aws-lb" {
 	name = "pcf-aws-lb"
@@ -339,7 +345,7 @@ resource "aws_internet_gateway" "pcf-vpc-gw" {
 *
 */
 resource "aws_instance" "nat" {
-	ami = "ami-4c9e4b24"
+  ami = "${lookup(var.aws_nat_ami, var.aws_region)}"
 	instance_type = "t2.small"
 	key_name = "${var.aws_key_name_ops}"
 	security_groups = ["${aws_security_group.OutboundNAT.id}"]
@@ -421,5 +427,3 @@ output "MySQL_Host" {
 output "OpsManager-DNS" {
     value = "${aws_instance.OpsManager.public_dns}"
 }
-
-
